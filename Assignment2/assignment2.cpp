@@ -25,7 +25,7 @@ double calculate(char a, double b, double c)
 
 bool isOperate(char a) 
 {
-    if (a == '+' | a == '-' | a == '*' | a == '/') 
+    if (a == '+' | a == '-' | a == '*' | a == '/' | a == '(' | a == ')') 
     {
         return true;
     }
@@ -63,7 +63,10 @@ int main()
             a = expression[i];
             if (isOperate(a) == false) 
             {
-                temp = temp.append(1,a);
+                if (a != ' ')
+                {
+                    temp = temp.append(1, a);
+                }
                 if (i == expression.length() - 1) {
                     num = stod(temp);
                     number.push(num);
@@ -78,9 +81,25 @@ int main()
                     number.push(num);
                     temp = "";
                 }
-                if (operate.empty())
+                if (operate.empty() | a == '(')
                 {
                     operate.push(a);
+                }
+                else if (a == ')')
+                {
+                    while (true) {
+                        b = operate.top();
+                        operate.pop();
+                        if (b == '(')
+                        {
+                            break;
+                        }
+                        d2 = number.top();
+                        number.pop();
+                        d1 = number.top();
+                        number.pop();
+                        number.push(calculate(b, d1, d2));
+                    }
                 }
                 else if(priority(a) <= priority(operate.top()))
                 {
