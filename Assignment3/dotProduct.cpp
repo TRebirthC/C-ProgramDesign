@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <ctime>
+#include <chrono>
 using namespace std;
 
 double dotProfuct(vector<float> a, vector<float> b)
@@ -62,9 +64,18 @@ int main()
 		input = 0;
 	}
 
+	
+	auto start = chrono::steady_clock::now();
 	double result = dotProfuct(a, b);
+	auto end = chrono::steady_clock::now();
+
 
 	cout << "The dot product of the two vectors is " << result << endl;
+	cout
+		<< "The calculation took "
+		<< chrono::duration_cast<chrono::microseconds>(end - start).count() << "μs ≈ "
+		<< chrono::duration_cast<chrono::milliseconds>(end - start).count() << "ms ≈ "
+		<< chrono::duration_cast<chrono::seconds>(end - start).count() << "s.\n";
 
 	return 0;
 }
