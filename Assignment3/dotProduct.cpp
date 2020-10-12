@@ -70,18 +70,9 @@ int main()
 	int n = 0;
 
 	n = 200000000;
-	while (n == 0)
-	{
-		cout << "Your input is illegal, please input the size again: " << endl;
-		cin.clear();
-		cin.ignore();
-		cin >> n;
-	}
-
 
 	float* a = new float[n];
 	float* b = new float[n];
-
 
 	for (int i = 0; i < n; i++)
 	{
