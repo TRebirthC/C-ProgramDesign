@@ -1,13 +1,12 @@
 #include <iostream>
-#include <vector>
 #include <ctime>
 #include <chrono>
 using namespace std;
 
-double dotProfuct(vector<float> a, vector<float> b)
+double dotProfuct(float a[], float b[], int length)
 {
 	double result = 0;
-	for (int i = 0; i < a.size(); i++)
+	for (int i = 0; i < length; i++)
 	{
 		result = result + a[i] * b[i];
 	}
@@ -16,58 +15,68 @@ double dotProfuct(vector<float> a, vector<float> b)
 
 int main()
 {
-	cout << "Please input the size of the vectors: ";
+	//cout << "Please input the size of the vectors: ";
 	int n = 0;
-	cin >> n;
+	//cin >> n;
+
+	n = 200000000;
 	while (n == 0)
 	{
-		cout << "Your input is illegal, please input the size again: " <<endl;
+		cout << "Your input is illegal, please input the size again: " << endl;
 		cin.clear();
 		cin.ignore();
 		cin >> n;
 	}
-	
 
-	vector<float> a;
-	vector<float> b;
 
-	cout << "Please input the first vector:" << endl;
+	float* a = new float[n];
+	float* b = new float[n];
 
-	float input = 0;
-	for (int i = 0; i < n; i++) 
-	{
-		cin >> input;
-		while (input == 0)
-		{
-			cout << "Your input is illegal, please input the float again: " << endl;
-			cin.clear();
-			cin.ignore();
-			cin >> input;
-		}
-		a.push_back(input);
-		input = 0;
-	}
+	//cout << "Please input the first vector:" << endl;
 
-	cout << "Please input the second vector:" << endl;
+	//float input = 0;
+	//for (int i = 0; i < n; i++)
+	//{
+	//	cin >> input;
+	//	while (input == 0)
+	//	{
+	//		cout << "Your input is illegal, please input the float again: " << endl;
+	//		cin.clear();
+	//		cin.ignore();
+	//		cin >> input;
+	//	}
+	//	a[i] = input;
+	//	input = 0;
+	//}
+
+	//cout << "Please input the second vector:" << endl;
+
+	//for (int i = 0; i < n; i++)
+	//{
+	//	cin >> input;
+	//	while (input == 0)
+	//	{
+	//		cout << "Your input is illegal, please input the float again: " << endl;
+	//		cin.clear();
+	//		cin.ignore();
+	//		cin >> input;
+	//	}
+	//	b[i] = input;
+	//	input = 0;
+	//}
 
 	for (int i = 0; i < n; i++)
 	{
-		cin >> input;
-		while (input == 0)
-		{
-			cout << "Your input is illegal, please input the float again: " << endl;
-			cin.clear();
-			cin.ignore();
-			cin >> input;
-		}
-		b.push_back(input);
-		input = 0;
+		a[i] = rand() / double(RAND_MAX);
+		b[i] = rand() / double(RAND_MAX);
 	}
 
-	
 	auto start = chrono::steady_clock::now();
-	double result = dotProfuct(a, b);
+	double result = dotProfuct(a, b, n);
 	auto end = chrono::steady_clock::now();
+
+	delete[] a;
+	delete[] b;
 
 
 	cout << "The dot product of the two vectors is " << result << endl;
