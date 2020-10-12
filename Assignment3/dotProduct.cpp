@@ -15,9 +15,59 @@ double dotProfuct(float a[], float b[], int length)
 
 int main()
 {
+	/* This part is for user to input */
+
 	//cout << "Please input the size of the vectors: ";
-	int n = 0;
+	//int n = 0;
 	//cin >> n;
+
+	//while (n == 0)
+	//{
+	//	cin.clear();
+	//	cin.ignore();
+	//	cin >> n;
+	//}
+
+
+	//float* a = new float[n];
+	//float* b = new float[n];
+
+	//cout << "Please input the first vector:" << endl;
+
+	//float input = 0;
+	//for (int i = 0; i < n; i++)
+	//{
+	//	cin >> input;
+	//	while (input == 0)
+	//	{
+	//		cin.clear();
+	//		cin.ignore();
+	//		cin >> input;
+	//	}
+	//	a[i] = input;
+	//	input = 0;
+	//}
+
+	//cout << "please input the second vector:" << endl;
+
+	//for (int i = 0; i < n; i++)
+	//{
+	//	cin >> input;
+	//	while (input == 0)
+	//	{
+	//		cin.clear();
+	//		cin.ignore();
+	//		cin >> input;
+	//	}
+	//	b[i] = input;
+	//	input = 0;
+	//}
+	
+	/* End of user input part */
+
+	/* This part is just to test, it generats 200M elements */
+
+	int n = 0;
 
 	n = 200000000;
 	while (n == 0)
@@ -32,44 +82,14 @@ int main()
 	float* a = new float[n];
 	float* b = new float[n];
 
-	//cout << "Please input the first vector:" << endl;
-
-	//float input = 0;
-	//for (int i = 0; i < n; i++)
-	//{
-	//	cin >> input;
-	//	while (input == 0)
-	//	{
-	//		cout << "Your input is illegal, please input the float again: " << endl;
-	//		cin.clear();
-	//		cin.ignore();
-	//		cin >> input;
-	//	}
-	//	a[i] = input;
-	//	input = 0;
-	//}
-
-	//cout << "Please input the second vector:" << endl;
-
-	//for (int i = 0; i < n; i++)
-	//{
-	//	cin >> input;
-	//	while (input == 0)
-	//	{
-	//		cout << "Your input is illegal, please input the float again: " << endl;
-	//		cin.clear();
-	//		cin.ignore();
-	//		cin >> input;
-	//	}
-	//	b[i] = input;
-	//	input = 0;
-	//}
 
 	for (int i = 0; i < n; i++)
 	{
 		a[i] = rand() / double(RAND_MAX);
 		b[i] = rand() / double(RAND_MAX);
 	}
+
+	/* End of test part */
 
 	auto start = chrono::steady_clock::now();
 	double result = dotProfuct(a, b, n);
