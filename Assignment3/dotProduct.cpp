@@ -37,13 +37,9 @@ int main()
 	//float input = 0;
 	//for (int i = 0; i < n; i++)
 	//{
+	//	cin.clear();
+	//	cin.ignore();
 	//	cin >> input;
-	//	while (input == 0)
-	//	{
-	//		cin.clear();
-	//		cin.ignore();
-	//		cin >> input;
-	//	}
 	//	a[i] = input;
 	//	input = 0;
 	//}
@@ -52,13 +48,9 @@ int main()
 
 	//for (int i = 0; i < n; i++)
 	//{
+	//	cin.clear();
+	//	cin.ignore();
 	//	cin >> input;
-	//	while (input == 0)
-	//	{
-	//		cin.clear();
-	//		cin.ignore();
-	//		cin >> input;
-	//	}
 	//	b[i] = input;
 	//	input = 0;
 	//}
