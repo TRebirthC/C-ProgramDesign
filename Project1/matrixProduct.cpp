@@ -1,5 +1,7 @@
 #include<iostream>
 #include<cblas.h>
+#include <ctime>
+#include <chrono>
 using namespace std;
 
 struct Matrix
@@ -66,10 +68,24 @@ int main()
 	{
 		b->data[i] = 6-i;
 	}
+
+	auto start = chrono::steady_clock::now();
 	Matrix c = matrixProduct(*a, *b);
+	auto end = chrono::steady_clock::now();
+
+	cout << "The calculation of matrix product finished. " << endl;
+	cout
+		<< "The calculation took "
+		<< chrono::duration_cast<chrono::microseconds>(end - start).count() << "μs ≈ "
+		<< chrono::duration_cast<chrono::milliseconds>(end - start).count() << "ms ≈ "
+		<< chrono::duration_cast<chrono::seconds>(end - start).count() << "s.\n";
+
 	for (int i = 0; i < 4; i++)
 	{
 		cout << c.data[i] << " ";
 	}
+
+	delete a;
+	delete b;
 	return 0;
 }
