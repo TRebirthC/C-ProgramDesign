@@ -6,9 +6,9 @@ using namespace std;
 
 struct Matrix
 {
-	int row;
-	int column;
-	float *data;
+	int row = 0;
+	int column = 0;
+	float *data = 0;
 };
 
 Matrix matrixProduct(Matrix a, Matrix b)
@@ -17,6 +17,13 @@ Matrix matrixProduct(Matrix a, Matrix b)
 	int rb = b.row;
 	int ca = a.column;
 	int cb = b.column;
+
+	if (ra == 0| rb == 0 | ca == 0 | cb == 0)
+	{
+		cout << "The input matrix are illegal." << endl;
+		return a;
+	}
+
 	if (ca != rb)
 	{
 		cout << "The two matrix do not match." << endl;
@@ -28,6 +35,13 @@ Matrix matrixProduct(Matrix a, Matrix b)
 	float* data = new float[ra * cb];
 	float* da = a.data;
 	float* db = b.data;
+
+	if (da == 0 | db == 0)
+	{
+		cout << "The input matrix are illegal." << endl;
+		return a;
+	}
+
 	float sum = 0;
 	for (int i = 0; i < ra; i++)
 	{
@@ -69,21 +83,38 @@ int main()
 		b->data[i] = 6-i;
 	}*/
 
-	Matrix* a = new Matrix;
-	a->column = 20000;
-	a->row = 5000;
+	/*Matrix* a = new Matrix;
+	a->column = 2000000;
+	a->row = 50;
 	a->data = new float[100000000];
 	for (int i = 0; i < 100000000; i++)
 	{
 		a->data[i] = 1;
 	}
 	Matrix* b = new Matrix;
-	b->column = 5000;
-	b->row = 20000;
+	b->column = 50;
+	b->row = 2000000;
 	b->data = new float[100000000];
 	for (int i = 0; i < 100000000; i++)
 	{
 		b->data[i] = 1;
+	}*/
+
+	Matrix* a = new Matrix;
+	a->column = 3;
+	a->row = 2;
+	a->data = new float[6];
+	for (int i = 0; i < 6; i++)
+	{
+		a->data[i] = i;
+	}
+	Matrix* b = new Matrix;
+	b->column = 2;
+	b->row = 3;
+	b->data = new float[6];
+	for (int i = 0; i < 6; i++)
+	{
+		b->data[i] = 6 - i;
 	}
 
 	auto start = chrono::steady_clock::now();
