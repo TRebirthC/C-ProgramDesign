@@ -53,10 +53,7 @@ Matrix matrixProduct(Matrix a, Matrix b)
 			for (int z = 0; z < ca; z++)
 			{
 				sum = sum + da[x + z] * db[y + z * cb];
-				//cout << da[x + z] <<" ";
-				//cout << db[y + z* cb] << endl;
 			}
-			//cout << endl;
 			data[j * ra + i] = sum;
 		}
 	}
@@ -64,26 +61,24 @@ Matrix matrixProduct(Matrix a, Matrix b)
 	return *result;
 }
 
+void showMatrix(Matrix* m)
+{
+	cout << "row: " << m->row << endl;
+	cout << "column: " << m->column << endl;
+	for (int i = 0; i < m->row; i++)
+	{
+		for (int j = 0; j < m->column; j++)
+		{
+			cout << m->data[i * m->column + j] << " ";
+		}
+		cout << endl;
+	}
+}
+
 int main()
 {
-	/*Matrix* a = new Matrix;
-	a->column = 3;
-	a->row = 2;
-	a->data = new float[6];
-	for(int i=0;i<6;i++)
-	{
-		a->data[i] = i;
-	}
-	Matrix* b = new Matrix;
-	b->column = 2;
-	b->row = 3;
-	b->data = new float[6];
-	for (int i = 0; i < 6; i++)
-	{
-		b->data[i] = 6-i;
-	}*/
-
-	/*Matrix* a = new Matrix;
+	//以下部分为数据量达到200M时的耗时计算部分
+	Matrix* a = new Matrix;
 	a->column = 2000000;
 	a->row = 50;
 	a->data = new float[100000000];
@@ -98,28 +93,36 @@ int main()
 	for (int i = 0; i < 100000000; i++)
 	{
 		b->data[i] = 1;
-	}*/
+	}
+	auto start = chrono::steady_clock::now();
+	Matrix c = matrixProduct(*a, *b);
+	auto end = chrono::steady_clock::now();
 
-	Matrix* a = new Matrix;
+	//以下部分为实例展示部分，会打印矩阵信息
+	/*Matrix* a = new Matrix;
 	a->column = 3;
 	a->row = 2;
 	a->data = new float[6];
 	for (int i = 0; i < 6; i++)
 	{
-		a->data[i] = i;
+		a->data[i] = rand() / double(RAND_MAX) * 100;
 	}
+	showMatrix(a);
 	Matrix* b = new Matrix;
 	b->column = 2;
 	b->row = 3;
 	b->data = new float[6];
 	for (int i = 0; i < 6; i++)
 	{
-		b->data[i] = 6 - i;
+		b->data[i] = rand() / double(RAND_MAX) * 100;
 	}
+	showMatrix(b);
 
 	auto start = chrono::steady_clock::now();
 	Matrix c = matrixProduct(*a, *b);
 	auto end = chrono::steady_clock::now();
+	showMatrix(&c);*/
+
 
 	cout << "The calculation of matrix product finished. " << endl;
 	cout
@@ -128,10 +131,6 @@ int main()
 		<< chrono::duration_cast<chrono::milliseconds>(end - start).count() << "ms ≈ "
 		<< chrono::duration_cast<chrono::seconds>(end - start).count() << "s.\n";
 
-	/*for (int i = 0; i < 4; i++)
-	{
-		cout << c.data[i] << " ";
-	}*/
 
 	delete a;
 	delete b;
