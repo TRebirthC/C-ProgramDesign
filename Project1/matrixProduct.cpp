@@ -1,8 +1,8 @@
 #include<iostream>
-#include<cblas.h>
 #include <ctime>
 #include <chrono>
 using namespace std;
+
 
 struct Matrix
 {
@@ -10,6 +10,7 @@ struct Matrix
 	int column = 0;
 	float *data = 0;
 };
+
 
 Matrix matrixProduct(Matrix a, Matrix b)
 {
@@ -29,6 +30,7 @@ Matrix matrixProduct(Matrix a, Matrix b)
 		cout << "The two matrix do not match." << endl;
 		return a;
 	}
+
 	Matrix* result = new Matrix;
 	result->row = ra;
 	result->column = cb;
@@ -42,24 +44,51 @@ Matrix matrixProduct(Matrix a, Matrix b)
 		return a;
 	}
 
-	float sum = 0;
-	for (int i = 0; i < ra; i++)
+	if (ca % 5 == 0)
 	{
-		for (int j = 0; j < cb; j++) 
+		float sum = 0;
+		for (int i = 0; i < ra; i++)
 		{
-			sum = 0;
-			int x = i * ca;
-			int y = j;
-			for (int z = 0; z < ca; z++)
+			for (int j = 0; j < cb; j++)
 			{
-				sum = sum + da[x + z] * db[y + z * cb];
+				sum = 0;
+				int x = i * ca;
+				int y = j;
+				for (int z = 0; z < ca / 5; z++)
+				{
+					sum = sum + da[x + 5 * z + 0] * db[y + (5 * z + 0) * cb];
+					sum = sum + da[x + 5 * z + 1] * db[y + (5 * z + 1) * cb];
+					sum = sum + da[x + 5 * z + 2] * db[y + (5 * z + 2) * cb];
+					sum = sum + da[x + 5 * z + 3] * db[y + (5 * z + 3) * cb];
+					sum = sum + da[x + 5 * z + 4] * db[y + (5 * z + 4) * cb];
+				}
+				data[j * ra + i] = sum;
 			}
-			data[j * ra + i] = sum;
 		}
 	}
+	else
+	{
+		float sum = 0;
+		for (int i = 0; i < ra; i++)
+		{
+			for (int j = 0; j < cb; j++)
+			{
+				sum = 0;
+				int x = i * ca;
+				int y = j;
+				for (int z = 0; z < ca; z++)
+				{
+					sum = sum + da[x + z] * db[y + z * cb];
+				}
+				data[j * ra + i] = sum;
+			}
+		}
+	}
+
 	result->data = data;
 	return *result;
 }
+
 
 void showMatrix(Matrix* m)
 {
@@ -74,6 +103,7 @@ void showMatrix(Matrix* m)
 		cout << endl;
 	}
 }
+
 
 int main()
 {
@@ -123,14 +153,12 @@ int main()
 	auto end = chrono::steady_clock::now();
 	showMatrix(&c);*/
 
-
 	cout << "The calculation of matrix product finished. " << endl;
 	cout
 		<< "The calculation took "
 		<< chrono::duration_cast<chrono::microseconds>(end - start).count() << "μs ≈ "
 		<< chrono::duration_cast<chrono::milliseconds>(end - start).count() << "ms ≈ "
 		<< chrono::duration_cast<chrono::seconds>(end - start).count() << "s.\n";
-
 
 	delete a;
 	delete b;
