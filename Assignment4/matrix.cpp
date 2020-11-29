@@ -43,15 +43,12 @@ std::ostream& operator<< (std::ostream& os, const Matrix& other)
 		}
 		cout << endl;
 	}
-	//cout << other.data[other.row * other.column];
 	return os;
 }
 
 Matrix& Matrix::operator=(const Matrix& ma)
 {
-	/*Matrix a(ma.row, ma.column, ma.data);
-	a.data[row * column]++;
-	return a;*/
+	data[row * column]--;
 	row = ma.row;
 	column = ma.column;
 	data = ma.data;
