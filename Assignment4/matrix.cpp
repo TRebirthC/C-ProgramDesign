@@ -49,10 +49,16 @@ std::ostream& operator<< (std::ostream& os, const Matrix& other)
 Matrix& Matrix::operator=(const Matrix& ma)
 {
 	data[row * column]--;
+	float* temp = data;
+	int index = row * column;
 	row = ma.row;
 	column = ma.column;
 	data = ma.data;
 	data[row * column]++;
+	if (temp[index] == 0)
+	{
+		delete[] temp;
+	}
 	return *this;
 }
 
