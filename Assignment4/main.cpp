@@ -41,7 +41,7 @@ int main()
 	}
 	dg[6] = 0;
 	Matrix g(3, 2, dg);
-	cout << "Matrix f(2, 3, dg)" << endl;
+	cout << "Matrix g(2, 3, dg)" << endl;
 	cout << g;
 	a = f * g;
 	cout << "a = f * g" << endl;
