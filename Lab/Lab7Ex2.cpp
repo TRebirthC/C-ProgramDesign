@@ -23,5 +23,6 @@ int main()
 	double b[] = { 1.1,2.0,3.0,4.0,5.5 };
 	cout << "Max int = " << max5(a) << endl;
 	cout << "Max double = " << max5(b) << endl;
+	cout << "Wuhu" << endl;
 	return 0;
 }
