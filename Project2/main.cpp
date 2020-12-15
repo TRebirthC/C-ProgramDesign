@@ -1,5 +1,6 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
+#include <math.h>
 using namespace cv;
 using namespace std;
 
@@ -240,9 +241,144 @@ Matrix* conv1(Matrix* Image_conv0,float** conv1data)
 	return Image_conv1;
 }
 
+Matrix* conv2(Matrix* Image_conv1, float** conv2data)
+{
+	Matrix* Image_conv2 = new Matrix[32];
+	int mrow = Image_conv1[0].row;
+	int mcolumn = Image_conv1[0].column;
+	for (int i = 0; i < 32; i++)
+	{
+		Image_conv1[i] = pad(Image_conv1[i]);
+	}
+	float** old = new float* [32];
+	for (int i = 0; i < 32; i++)
+	{
+		old[i] = Image_conv1[i].data;
+	}
+	for (int z = 0; z < 32; z++)
+	{
+		float bias = conv2_bias[z];
+		float** weight = new float* [32];
+		for (int i = 0; i < 32; i++)
+		{
+			weight[i] = new float[9];
+			for (int k = 0; k < 9; k++)
+			{
+				weight[i][k] = conv2_weight[z * 32 * 3 * 3 + k + i * 9];
+			}
+		}
+		int row = mrow / 2;
+		int column = mcolumn / 2;
+		int length = row * column;
+		float sum;
+		for (int i = 0; i < mrow; i = i + 2)
+		{
+			for (int j = 0; j < mcolumn; j = j + 2)
+			{
+
+				int r = i / 2;
+				int c = j / 2;
+				sum = 0;
+				for (int k = 0; k < 16; k++)
+				{
+					sum = sum + weight[k][0] * old[k][i * mcolumn + j] + weight[k][1] * old[k][i * mcolumn + j + 1] + weight[k][2] * old[k][i * mcolumn + j + 2]
+						+ weight[k][3] * old[k][(i + 1) * mcolumn + j] + weight[k][4] * old[k][(i + 1) * mcolumn + j + 1] + weight[k][5] * old[k][(i + 1) * mcolumn + j + 2]
+						+ weight[k][6] * old[k][(i + 2) * mcolumn + j] + weight[k][7] * old[k][(i + 2) * mcolumn + j + 1] + weight[k][8] * old[k][(i + 2) * mcolumn + j + 2];
+				}
+				sum = sum + bias;
+				if (sum < 0)
+				{
+					sum = 0;
+				}
+				conv2data[z][r * column + c] = sum;
+			}
+		}
+		Matrix conv2(row, column, conv2data[z]);
+		Image_conv2[z] = conv2;
+	}
+	return Image_conv2;
+}
+
+void flatten(Matrix* Image_conv2, float* flat)
+{
+	int index = 0;
+	for (int i = 0; i < 32; i++)
+	{
+		for (int j = 0; j < 64; j++)
+		{
+			flat[index] = Image_conv2[i].data[j];
+			index++;
+		}
+	}
+}
+
+float fca(float* falt)
+{
+	float a = 0;
+	float b = 0;
+	int countaz = 0;
+	int countaf = 0;
+	int countbz = 0;
+	int countbf = 0;
+	for (int i = 0; i < 2048; i++)
+	{
+		a = a + falt[i] * fc0_weight[i];
+		b = b + falt[i] * fc0_weight[2048 + i];
+		if (falt[i] * fc0_weight[i] > 0) {
+			countaz++;
+		}
+		if (falt[i] * fc0_weight[i] < 0) {
+			countaf++;
+		}
+		if (falt[i] * fc0_weight[2048 + i] > 0) {
+			countbz++;
+		}
+		if (falt[i] * fc0_weight[2048 + i] < 0) {
+			countbf++;
+		}
+	}
+	a = a + fc0_bias[0];
+	b = b + fc0_bias[1];
+	cout << a << " " << b << endl;
+	cout << countaz << " " << countaf << " " << countbz << " " << countbf << endl;
+	return a;
+}
+
+float fcb(float* falt)
+{
+	float a = 0;
+	float b = 0;
+	int countaz = 0;
+	int countaf = 0;
+	int countbz = 0;
+	int countbf = 0;
+	for (int i = 0; i < 2048; i++)
+	{
+		a = a + falt[i] * fc0_weight[i];
+		b = b + falt[i] * fc0_weight[2048 + i];
+		if (falt[i] * fc0_weight[i] > 0) {
+			countaz++;
+		}
+		if (falt[i] * fc0_weight[i] < 0) {
+			countaf++;
+		}
+		if (falt[i] * fc0_weight[2048 + i] > 0) {
+			countbz++;
+		}
+		if (falt[i] * fc0_weight[2048 + i] < 0) {
+			countbf++;
+		}
+	}
+	a = a + fc0_bias[0];
+	b = b + fc0_bias[1];
+	cout << a << " " << b << endl;
+	cout << countaz << " " << countaf << " " << countbz << " " << countbf << endl;
+	return b;
+}
+
 int main()
 {
-	Mat image = imread("face.jpg");
+	Mat image = imread("bg.jpg");
 	int row = image.rows;
 	int col = image.cols;
 	int size = row * col;
@@ -287,7 +423,21 @@ int main()
 	{
 		Image_conv1[i] = maxPool(Image_conv1[i]);
 	}
-	showMatrix(Image_conv1[31]);
-	cout << "qifei"<<endl;
+	float** conv2data = new float* [32];
+	for (int i = 0; i < 32; i++)
+	{
+		conv2data[i] = new float[64];
+	}
+	Matrix* Image_conv2 = conv2(Image_conv1, conv2data);
+	float* flat = new float[2048];
+	flatten(Image_conv2, flat);
+	float noface = 0;
+	float face = 0;
+	noface = fca(flat);
+	face = fcb(flat);
+	double bg = exp(noface);
+	double fa = exp(face);
+	cout << bg << endl;
+	cout << fa << endl;
 	return 0;
 }
