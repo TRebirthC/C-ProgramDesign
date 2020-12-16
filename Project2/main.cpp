@@ -7,11 +7,11 @@ using namespace std;
 class Matrix
 {
 public:
-    int row = 0;
-    int column = 0;
-    float* data = 0;
+	int row = 0;
+	int column = 0;
+	float* data = 0;
 
-	Matrix() 
+	Matrix()
 	{
 
 	}
@@ -68,13 +68,15 @@ Matrix pad(Matrix m)
 	float* mdata = m.data;
 	int length = row * column;
 	float* data = new float[length];
+	int index;
 	for (int i = 0; i < row; i++)
 	{
 		for (int j = 0; j < column; j++)
 		{
 			if (i == 0 || i == row - 1 || j == 0 || j == column - 1)
 			{
-				data[j * row + i] = 0;
+				index = j * row + i;
+				data[index] = 0.0f;
 			}
 			else
 			{
@@ -104,7 +106,7 @@ Matrix maxPool(Matrix m)
 			c = mdata[(2 * j + 1) * mrow + 2 * i];
 			d = mdata[(2 * j + 1) * mrow + 2 * i + 1];
 			max = 0;
-			if (a > max) 
+			if (a > max)
 			{
 				max = a;
 			}
@@ -127,177 +129,189 @@ Matrix maxPool(Matrix m)
 	return pad;
 }
 
-Matrix* conv0(Matrix* Image)
-{
-	Matrix* Image_conv0 = new Matrix[16];
-	int mrow = Image[0].row;
-	int mcolumn = Image[0].column;
-	for (int i = 0; i < 3; i++)
-	{
-		Image[i] = pad(Image[i]);
-	}
-	float* datar = Image[0].data;
-	float* datag = Image[1].data;
-	float* datab = Image[2].data;
-	for (int z = 0; z < 16; z++)
-	{
-		float bias = conv0_bias[z];
-		float* weightr = new float[9];
-		float* weightg = new float[9];
-		float* weightb = new float[9];
-		for (int k = 0; k < 9; k++)
-		{
-			weightr[k] = conv0_weight[z * 3 * 3 * 3 + k];
-			weightg[k] = conv0_weight[z * 3 * 3 * 3 + k + 9];
-			weightb[k] = conv0_weight[z * 3 * 3 * 3 + k + 18];
-		}
-		int row = mrow / 2;
-		int column = mcolumn / 2;
-		float* data = new float[row * column];
-		float sum;
-		for (int i = 0; i < mrow; i = i + 2)
-		{
-			for (int j = 0; j < mcolumn; j = j + 2)
-			{
-				int r = i / 2;
-				int c = j / 2;
-				sum = 0;
-				sum = sum + weightr[0] * datar[i * mcolumn + j] + weightr[1] * datar[i * mcolumn + j + 1] + weightr[2] * datar[i * mcolumn + j + 2]
-					+ weightr[3] * datar[(i + 1) * mcolumn + j] + weightr[4] * datar[(i + 1) * mcolumn + j + 1] + weightr[5] * datar[(i + 1) * mcolumn + j + 2]
-					+ weightr[6] * datar[(i + 2) * mcolumn + j] + weightr[7] * datar[(i + 2) * mcolumn + j + 1] + weightr[8] * datar[(i + 2) * mcolumn + j + 2];
-				sum = sum + weightg[0] * datag[i * mcolumn + j] + weightg[1] * datag[i * mcolumn + j + 1] + weightg[2] * datag[i * mcolumn + j + 2]
-					+ weightg[3] * datag[(i + 1) * mcolumn + j] + weightg[4] * datag[(i + 1) * mcolumn + j + 1] + weightg[5] * datag[(i + 1) * mcolumn + j + 2]
-					+ weightg[6] * datag[(i + 2) * mcolumn + j] + weightg[7] * datag[(i + 2) * mcolumn + j + 1] + weightg[8] * datag[(i + 2) * mcolumn + j + 2];
-				sum = sum + weightb[0] * datab[i * mcolumn + j] + weightb[1] * datab[i * mcolumn + j + 1] + weightb[2] * datab[i * mcolumn + j + 2]
-					+ weightb[3] * datab[(i + 1) * mcolumn + j] + weightb[4] * datab[(i + 1) * mcolumn + j + 1] + weightb[5] * datab[(i + 1) * mcolumn + j + 2]
-					+ weightb[6] * datab[(i + 2) * mcolumn + j] + weightb[7] * datab[(i + 2) * mcolumn + j + 1] + weightb[8] * datab[(i + 2) * mcolumn + j + 2];
-				sum = sum + bias;
-				if (sum < 0)
-				{
-					sum = 0;
-				}
-				data[r * column + c] = sum;
-			}
-		}
-		Matrix conv0(row, column, data);
-		Image_conv0[z] = conv0;
-	}
-	return Image_conv0;
-}
-
-Matrix* conv1(Matrix* Image_conv0,float** conv1data)
-{
-	Matrix* Image_conv1 = new Matrix[32];
-	int mrow = Image_conv0[0].row;
-	int mcolumn = Image_conv0[0].column;
-	for (int i = 0; i < 16; i++)
-	{
-		Image_conv0[i] = pad(Image_conv0[i]);
-	}
-	float** old = new float* [16];
-	for (int i = 0; i < 16; i++)
-	{
-		old[i] = Image_conv0[i].data;
-	}
-	for (int z = 0; z < 32; z++)
-	{
-		float bias = conv1_bias[z];
-		float** weight = new float* [16];
-		for (int i = 0; i < 16; i++)
-		{
-			weight[i] = new float[9];
-			for (int k = 0; k < 9; k++)
-			{
-				weight[i][k] = conv1_weight[z * 16 * 3 * 3 + k + i * 9];
-			}
-		}
-		int row = mrow;
-		int column = mcolumn;
-		int length = row * column;
-		float sum;
-		for (int i = 0; i < mrow + 2; i = i + 1)
-		{
-			for (int j = 0; j < mcolumn + 2; j = j + 1)
-			{
-
-				sum = 0;
-				for (int k = 0; k < 16; k++)
-				{
-					sum = sum + weight[k][0] * old[k][i * mcolumn + j] + weight[k][1] * old[k][i * mcolumn + j + 1] + weight[k][2] * old[k][i * mcolumn + j + 2]
-						+ weight[k][3] * old[k][(i + 1) * mcolumn + j] + weight[k][4] * old[k][(i + 1) * mcolumn + j + 1] + weight[k][5] * old[k][(i + 1) * mcolumn + j + 2]
-						+ weight[k][6] * old[k][(i + 2) * mcolumn + j] + weight[k][7] * old[k][(i + 2) * mcolumn + j + 1] + weight[k][8] * old[k][(i + 2) * mcolumn + j + 2];
-				}
-				sum = sum + bias;
-				if (sum < 0)
-				{
-					sum = 0;
-				}
-				conv1data[z][i * column + j] = sum;
-			}
-		}
-		Matrix conv1(row, column, conv1data[z]);
-		Image_conv1[z] = conv1;
-	}
-	return Image_conv1;
-}
-
-Matrix* conv2(Matrix* Image_conv1, float** conv2data)
-{
-	Matrix* Image_conv2 = new Matrix[32];
-	int mrow = Image_conv1[0].row;
-	int mcolumn = Image_conv1[0].column;
-	for (int i = 0; i < 32; i++)
-	{
-		Image_conv1[i] = pad(Image_conv1[i]);
-	}
-	float** old = new float* [32];
-	for (int i = 0; i < 32; i++)
-	{
-		old[i] = Image_conv1[i].data;
-	}
-	for (int z = 0; z < 32; z++)
-	{
-		float bias = conv2_bias[z];
-		float** weight = new float* [32];
-		for (int i = 0; i < 32; i++)
-		{
-			weight[i] = new float[9];
-			for (int k = 0; k < 9; k++)
-			{
-				weight[i][k] = conv2_weight[z * 32 * 3 * 3 + k + i * 9];
-			}
-		}
-		int row = mrow / 2;
-		int column = mcolumn / 2;
-		int length = row * column;
-		float sum;
-		for (int i = 0; i < mrow; i = i + 2)
-		{
-			for (int j = 0; j < mcolumn; j = j + 2)
-			{
-
-				int r = i / 2;
-				int c = j / 2;
-				sum = 0;
-				for (int k = 0; k < 16; k++)
-				{
-					sum = sum + weight[k][0] * old[k][i * mcolumn + j] + weight[k][1] * old[k][i * mcolumn + j + 1] + weight[k][2] * old[k][i * mcolumn + j + 2]
-						+ weight[k][3] * old[k][(i + 1) * mcolumn + j] + weight[k][4] * old[k][(i + 1) * mcolumn + j + 1] + weight[k][5] * old[k][(i + 1) * mcolumn + j + 2]
-						+ weight[k][6] * old[k][(i + 2) * mcolumn + j] + weight[k][7] * old[k][(i + 2) * mcolumn + j + 1] + weight[k][8] * old[k][(i + 2) * mcolumn + j + 2];
-				}
-				sum = sum + bias;
-				if (sum < 0)
-				{
-					sum = 0;
-				}
-				conv2data[z][r * column + c] = sum;
-			}
-		}
-		Matrix conv2(row, column, conv2data[z]);
-		Image_conv2[z] = conv2;
-	}
-	return Image_conv2;
-}
+//Matrix* conv0(Matrix* Image)
+//{
+//	Matrix* Image_conv0 = new Matrix[16];
+//	int mrow = Image[0].row;
+//	int mcolumn = Image[0].column;
+//	cout << "conv0mr  " << mrow << endl;
+//	cout << "conv0mc  " << mcolumn << endl;
+//	for (int i = 0; i < 3; i++)
+//	{
+//		Image[i] = pad(Image[i]);
+//	}
+//	float* datab = Image[0].data;
+//	float* datar = Image[1].data;
+//	float* datag = Image[2].data;
+//	cout << "conv0padr  " << Image[0].row << endl;
+//	cout << "conv0padc  " << Image[0].column << endl;
+//	for (int z = 0; z < 16; z++)
+//	{
+//		float bias = conv0_bias[z];
+//		float* weightb = new float[9];
+//		float* weightr = new float[9];
+//		float* weightg = new float[9];
+//		for (int k = 0; k < 9; k++)
+//		{
+//			weightb[k] = conv0_weight[z * 3 * 3 * 3 + k];
+//			weightr[k] = conv0_weight[z * 3 * 3 * 3 + k + 9];
+//			weightg[k] = conv0_weight[z * 3 * 3 * 3 + k + 18];
+//		}
+//		int row = 64;
+//		int column = 64;
+//		float* data = new float[row * column];
+//		float sum;
+//		mrow = 130;
+//		mcolumn = 130;
+//		for (int i = 0; i < 128; i = i + 2)
+//		{
+//			for (int j = 0; j < 128; j = j + 2)
+//			{
+//				int r = i / 2;
+//				int c = j / 2;
+//				sum = 0;
+//				sum = sum + weightr[0] * datar[i * mcolumn + j] + weightr[1] * datar[i * mcolumn + j + 1] + weightr[2] * datar[i * mcolumn + j + 2]
+//					+ weightr[3] * datar[(i + 1) * mcolumn + j] + weightr[4] * datar[(i + 1) * mcolumn + j + 1] + weightr[5] * datar[(i + 1) * mcolumn + j + 2]
+//					+ weightr[6] * datar[(i + 2) * mcolumn + j] + weightr[7] * datar[(i + 2) * mcolumn + j + 1] + weightr[8] * datar[(i + 2) * mcolumn + j + 2];
+//				sum = sum + weightg[0] * datag[i * mcolumn + j] + weightg[1] * datag[i * mcolumn + j + 1] + weightg[2] * datag[i * mcolumn + j + 2]
+//					+ weightg[3] * datag[(i + 1) * mcolumn + j] + weightg[4] * datag[(i + 1) * mcolumn + j + 1] + weightg[5] * datag[(i + 1) * mcolumn + j + 2]
+//					+ weightg[6] * datag[(i + 2) * mcolumn + j] + weightg[7] * datag[(i + 2) * mcolumn + j + 1] + weightg[8] * datag[(i + 2) * mcolumn + j + 2];
+//				sum = sum + weightb[0] * datab[i * mcolumn + j] + weightb[1] * datab[i * mcolumn + j + 1] + weightb[2] * datab[i * mcolumn + j + 2]
+//					+ weightb[3] * datab[(i + 1) * mcolumn + j] + weightb[4] * datab[(i + 1) * mcolumn + j + 1] + weightb[5] * datab[(i + 1) * mcolumn + j + 2]
+//					+ weightb[6] * datab[(i + 2) * mcolumn + j] + weightb[7] * datab[(i + 2) * mcolumn + j + 1] + weightb[8] * datab[(i + 2) * mcolumn + j + 2];
+//				sum = sum + bias;
+//				if (sum < 0)
+//				{
+//					sum = 0;
+//				}
+//				data[r * column + c] = sum;
+//			}
+//		}
+//		Matrix conv0(row, column, data);
+//		Image_conv0[z] = conv0;
+//	}
+//	return Image_conv0;
+//}
+//
+//Matrix* conv1(Matrix* Image_conv0, float** conv1data)
+//{
+//	Matrix* Image_conv1 = new Matrix[32];
+//	int mrow = Image_conv0[0].row;
+//	int mcolumn = Image_conv0[0].column;
+//	for (int i = 0; i < 16; i++)
+//	{
+//		Image_conv0[i] = pad(Image_conv0[i]);
+//	}
+//	cout << "conv1padr  " << Image_conv0[0].row << endl;
+//	cout << "conv1padc  " << Image_conv0[0].column << endl;
+//	float** old = new float* [16];
+//	for (int i = 0; i < 16; i++)
+//	{
+//		old[i] = Image_conv0[i].data;
+//	}
+//	for (int z = 0; z < 32; z++)
+//	{
+//		float bias = conv1_bias[z];
+//		float** weight = new float* [16];
+//		for (int i = 0; i < 16; i++)
+//		{
+//			weight[i] = new float[9];
+//			for (int k = 0; k < 9; k++)
+//			{
+//				weight[i][k] = conv1_weight[z * 16 * 3 * 3 + k + i * 9];
+//			}
+//		}
+//		int row = 32;
+//		int column = 32;
+//		int length = row * column;
+//		float sum;
+//		mrow = 34;
+//		mcolumn = 34;
+//		for (int i = 0; i < mrow - 2; i = i + 1)
+//		{
+//			for (int j = 0; j < mcolumn - 2; j = j + 1)
+//			{
+//
+//				sum = 0;
+//				for (int k = 0; k < 16; k++)
+//				{
+//					sum = sum + weight[k][0] * old[k][i * mcolumn + j] + weight[k][1] * old[k][i * mcolumn + j + 1] + weight[k][2] * old[k][i * mcolumn + j + 2]
+//						+ weight[k][3] * old[k][(i + 1) * mcolumn + j] + weight[k][4] * old[k][(i + 1) * mcolumn + j + 1] + weight[k][5] * old[k][(i + 1) * mcolumn + j + 2]
+//						+ weight[k][6] * old[k][(i + 2) * mcolumn + j] + weight[k][7] * old[k][(i + 2) * mcolumn + j + 1] + weight[k][8] * old[k][(i + 2) * mcolumn + j + 2];
+//				}
+//				sum = sum + bias;
+//				if (sum < 0)
+//				{
+//					sum = 0;
+//				}
+//				conv1data[z][i * column + j] = sum;
+//			}
+//		}
+//		Matrix conv1(row, column, conv1data[z]);
+//		Image_conv1[z] = conv1;
+//	}
+//	return Image_conv1;
+//}
+//
+//Matrix* conv2(Matrix* Image_conv1, float** conv2data)
+//{
+//	Matrix* Image_conv2 = new Matrix[32];
+//	int mrow = Image_conv1[0].row;
+//	int mcolumn = Image_conv1[0].column;
+//	for (int i = 0; i < 32; i++)
+//	{
+//		Image_conv1[i] = pad(Image_conv1[i]);
+//	}
+//	float** old = new float* [32];
+//	for (int i = 0; i < 32; i++)
+//	{
+//		old[i] = Image_conv1[i].data;
+//	}
+//	for (int z = 0; z < 32; z++)
+//	{
+//		float bias = conv2_bias[z];
+//		float** weight = new float* [32];
+//		for (int i = 0; i < 32; i++)
+//		{
+//			weight[i] = new float[9];
+//			for (int k = 0; k < 9; k++)
+//			{
+//				weight[i][k] = conv2_weight[z * 32 * 3 * 3 + k + i * 9];
+//			}
+//		}
+//		int row = 8;
+//		int column = 8;
+//		int length = row * column;
+//		float sum;
+//		mrow = 18;
+//		mcolumn = 18;
+//		for (int i = 0; i < 16; i = i + 2)
+//		{
+//			for (int j = 0; j < 16; j = j + 2)
+//			{
+//
+//				int r = i / 2;
+//				int c = j / 2;
+//				sum = 0;
+//				for (int k = 0; k < 16; k++)
+//				{
+//					sum = sum + weight[k][0] * old[k][i * mcolumn + j] + weight[k][1] * old[k][i * mcolumn + j + 1] + weight[k][2] * old[k][i * mcolumn + j + 2]
+//						+ weight[k][3] * old[k][(i + 1) * mcolumn + j] + weight[k][4] * old[k][(i + 1) * mcolumn + j + 1] + weight[k][5] * old[k][(i + 1) * mcolumn + j + 2]
+//						+ weight[k][6] * old[k][(i + 2) * mcolumn + j] + weight[k][7] * old[k][(i + 2) * mcolumn + j + 1] + weight[k][8] * old[k][(i + 2) * mcolumn + j + 2];
+//				}
+//				sum = sum + bias;
+//				if (sum < 0)
+//				{
+//					sum = 0;
+//				}
+//				conv2data[z][r * column + c] = sum;
+//			}
+//		}
+//		Matrix conv2(row, column, conv2data[z]);
+//		Image_conv2[z] = conv2;
+//	}
+//	return Image_conv2;
+//}
 
 void flatten(Matrix* Image_conv2, float* flat)
 {
@@ -310,90 +324,100 @@ void flatten(Matrix* Image_conv2, float* flat)
 			index++;
 		}
 	}
-}
-
-float fca(float* falt)
-{
-	float a = 0;
-	float b = 0;
-	int countaz = 0;
-	int countaf = 0;
-	int countbz = 0;
-	int countbf = 0;
-	for (int i = 0; i < 2048; i++)
+	/*for (int i = 0; i < 64; i++)
 	{
-		a = a + falt[i] * fc0_weight[i];
-		b = b + falt[i] * fc0_weight[2048 + i];
-		if (falt[i] * fc0_weight[i] > 0) {
-			countaz++;
+		for (int j = 0; j < 32; j++)
+		{
+			flat[index] = Image_conv2[j].data[i];
+			index++;
 		}
-		if (falt[i] * fc0_weight[i] < 0) {
-			countaf++;
-		}
-		if (falt[i] * fc0_weight[2048 + i] > 0) {
-			countbz++;
-		}
-		if (falt[i] * fc0_weight[2048 + i] < 0) {
-			countbf++;
-		}
-	}
-	a = a + fc0_bias[0];
-	b = b + fc0_bias[1];
-	cout << a << " " << b << endl;
-	cout << countaz << " " << countaf << " " << countbz << " " << countbf << endl;
-	return a;
+	}*/
 }
 
-float fcb(float* falt)
-{
-	float a = 0;
-	float b = 0;
-	int countaz = 0;
-	int countaf = 0;
-	int countbz = 0;
-	int countbf = 0;
-	for (int i = 0; i < 2048; i++)
-	{
-		a = a + falt[i] * fc0_weight[i];
-		b = b + falt[i] * fc0_weight[2048 + i];
-		if (falt[i] * fc0_weight[i] > 0) {
-			countaz++;
-		}
-		if (falt[i] * fc0_weight[i] < 0) {
-			countaf++;
-		}
-		if (falt[i] * fc0_weight[2048 + i] > 0) {
-			countbz++;
-		}
-		if (falt[i] * fc0_weight[2048 + i] < 0) {
-			countbf++;
-		}
-	}
-	a = a + fc0_bias[0];
-	b = b + fc0_bias[1];
-	cout << a << " " << b << endl;
-	cout << countaz << " " << countaf << " " << countbz << " " << countbf << endl;
-	return b;
-}
+//float fca(float* falt)
+//{
+//	float a = 0;
+//	float b = 0;
+//	int countaz = 0;
+//	int countaf = 0;
+//	int countbz = 0;
+//	int countbf = 0;
+//	for (int i = 0; i < 2048; i++)
+//	{
+//		a = a + falt[i] * fc0_weight[i];
+//		b = b + falt[i] * fc0_weight[2048 + i];
+//		if (falt[i] * fc0_weight[i] > 0) {
+//			countaz++;
+//		}
+//		if (falt[i] * fc0_weight[i] < 0) {
+//			countaf++;
+//		}
+//		if (falt[i] * fc0_weight[2048 + i] > 0) {
+//			countbz++;
+//		}
+//		if (falt[i] * fc0_weight[2048 + i] < 0) {
+//			countbf++;
+//		}
+//	}
+//	a = a + fc0_bias[0];
+//	b = b + fc0_bias[1];
+//	cout << a << " " << b << endl;
+//	cout << countaz << " " << countaf << " " << countbz << " " << countbf << endl;
+//	return a;
+//}
+//
+//float fcb(float* falt)
+//{
+//	float a = 0;
+//	float b = 0;
+//	int countaz = 0;
+//	int countaf = 0;
+//	int countbz = 0;
+//	int countbf = 0;
+//	for (int i = 0; i < 2048; i++)
+//	{
+//		a = a + falt[i] * fc0_weight[i];
+//		b = b + falt[i] * fc0_weight[2048 + i];
+//		if (falt[i] * fc0_weight[i] > 0) {
+//			countaz++;
+//		}
+//		if (falt[i] * fc0_weight[i] < 0) {
+//			countaf++;
+//		}
+//		if (falt[i] * fc0_weight[2048 + i] > 0) {
+//			countbz++;
+//		}
+//		if (falt[i] * fc0_weight[2048 + i] < 0) {
+//			countbf++;
+//		}
+//	}
+//	a = a + fc0_bias[0];
+//	b = b + fc0_bias[1];
+//	cout << a << " " << b << endl;
+//	cout << countaz << " " << countaf << " " << countbz << " " << countbf << endl;
+//	return b;
+//}
 
-int main()
+
+
+Matrix* readImage(string filename)
 {
-	Mat image = imread("bg.jpg");
+	Mat image = imread(filename);
 	int row = image.rows;
 	int col = image.cols;
 	int size = row * col;
 	float* datar = new float[size];
 	float* datag = new float[size];
 	float* datab = new float[size];
-	int r, g, b;
+	float r, g, b;
 	int count = 0;
 	for (int i = 0; i < row; i++)
 	{
 		for (int j = 0; j < col; j++)
 		{
-			r = image.at<Vec3b>(i, j)[0];
-			g = image.at<Vec3b>(i, j)[1];
-			b = image.at<Vec3b>(i, j)[2];
+			b = image.at<Vec3b>(i, j)[0];
+			r = image.at<Vec3b>(i, j)[1];
+			g = image.at<Vec3b>(i, j)[2];
 			datar[count] = r;
 			datag[count] = g;
 			datab[count] = b;
@@ -405,9 +429,177 @@ int main()
 	Matrix G(128, 128, datag);
 	Matrix B(128, 128, datab);
 	Matrix* Image = new Matrix[3];
-	Image[0] = R;
-	Image[1] = G;
-	Image[2] = B;
+	Image[0] = B;
+	Image[1] = R;
+	Image[2] = G;
+	return Image;
+}
+
+float*** getConvWeight(float* weight,int out_channels,int in_channels)
+{
+	float*** ConvWeight = new float** [out_channels];
+	for (int i = 0; i < out_channels; i++)
+	{
+		ConvWeight[i] = new float* [in_channels];
+		for (int j = 0; j < in_channels; j++)
+		{
+			ConvWeight[i][j] = new float[9];
+			for (int k = 0; k < 9; k++)
+			{
+				ConvWeight[i][j][k] = weight[i * in_channels * 9 + j * 9 + k];
+			}
+		}
+	}
+	return ConvWeight;
+}
+
+Matrix* convLayer(Matrix* input_channel, int padding, int stride, int in_channels, int out_channels, float*** convWeight, float* bias)
+{
+	int oldrow = input_channel[0].row;
+	int oldcolumn = input_channel[0].column;
+	if (padding == 1)
+	{
+		for (int i = 0; i < in_channels; i++)
+		{
+			input_channel[i] = pad(input_channel[i]);
+		}
+	}
+	Matrix* output_channel = new Matrix[out_channels];
+	if (stride == 1)
+	{
+		int outrow = oldrow;
+		int outcolumn = oldcolumn;
+		for (int i = 0; i < out_channels; i++)
+		{
+			float sum = 0;
+			int row = input_channel[0].row;
+			int column = input_channel[0].column;
+			float** data = new float* [in_channels];
+			float* outdata = new float[outrow * outcolumn];
+			for (int j = 0; j < in_channels; j++) 
+			{
+				data[j] = input_channel[j].data;
+			}
+			for (int k = 0; k < oldrow; k++)
+			{
+				for (int z = 0; z < oldcolumn; z++)
+				{
+
+					sum = 0;
+					for (int j = 0; j < in_channels; j++)
+					{
+						sum = sum + convWeight[i][j][0] * data[j][k * column + z] + convWeight[i][j][1] * data[j][k * column + z + 1]
+							+ convWeight[i][j][2] * data[j][k * column + z + 2] + convWeight[i][j][3] * data[j][(k + 1) * column + z]
+							+ convWeight[i][j][4] * data[j][(k + 1) * column + z + 1] + convWeight[i][j][5] * data[j][(k + 1) * column + z + 2]
+							+ convWeight[i][j][6] * data[j][(k + 2) * column + z] + convWeight[i][j][7] * data[j][(k + 2) * column + z + 1]
+							+ convWeight[i][j][8] * data[j][(k + 2) * column + z + 2];
+					}
+					sum = sum + bias[i];
+					if (sum < 0)
+					{
+						sum = 0;
+					}
+					outdata[k * outcolumn + z] = sum;
+
+				}
+			}
+			Matrix out_Matrix(outrow, outcolumn, outdata);
+			output_channel[i] = out_Matrix;
+		}
+	}
+	else if (stride == 2)
+	{
+		int outrow = oldrow / 2;
+		int outcolumn = oldcolumn / 2;
+		for (int i = 0; i < out_channels; i++)
+		{
+			float sum = 0;
+			int row = input_channel[0].row;
+			int column = input_channel[0].column;
+			float** data = new float* [in_channels];
+			float* outdata = new float[outrow * outcolumn];
+			for (int j = 0; j < in_channels; j++)
+			{
+				data[j] = input_channel[j].data;
+			}
+			for (int k = 0; k < oldrow; k = k + 2)
+			{
+				for (int z = 0; z < oldcolumn; z = z + 2)
+				{
+
+					sum = 0;
+					for (int j = 0; j < in_channels; j++)
+					{
+						sum = sum + convWeight[i][j][0] * data[j][k * column + z] + convWeight[i][j][1] * data[j][k * column + z + 1]
+							+ convWeight[i][j][2] * data[j][k * column + z + 2] + convWeight[i][j][3] * data[j][(k + 1) * column + z]
+							+ convWeight[i][j][4] * data[j][(k + 1) * column + z + 1] + convWeight[i][j][5] * data[j][(k + 1) * column + z + 2]
+							+ convWeight[i][j][6] * data[j][(k + 2) * column + z] + convWeight[i][j][7] * data[j][(k + 2) * column + z + 1]
+							+ convWeight[i][j][8] * data[j][(k + 2) * column + z + 2];
+					}
+					sum = sum + bias[i];
+					if (sum < 0)
+					{
+						sum = 0;
+					}
+					outdata[k / 2 * outcolumn + z / 2] = sum;
+
+				}
+			}
+			Matrix out_Matrix(outrow, outcolumn, outdata);
+			output_channel[i] = out_Matrix;
+		}
+	}
+	return output_channel;
+}
+
+float fcLayera(float* flat)
+{
+	float a = 0;
+	for (int i = 0; i < 2048; i++)
+	{
+		a = a + flat[i] * fc0_weight[i];
+	}
+	a = a + fc0_bias[0];
+	return a;
+}
+
+float fcLayerb(float* flat)
+{
+	float b = 0;
+	for (int i = 0; i < 2048; i++)
+	{
+		b = b + flat[i] * fc0_weight[i + 2048];
+	}
+	b = b + fc0_bias[1];
+	return b;
+}
+
+int main()
+{
+	Matrix* Image = readImage("bg.jpg");
+	float*** Conv0Weight = getConvWeight(conv0_weight, 16, 3);
+	float*** Conv1Weight = getConvWeight(conv1_weight, 32, 16);
+	float*** Conv2Weight = getConvWeight(conv2_weight, 32, 32);
+	Matrix* conv0 = convLayer(Image, 1, 2, 3, 16, Conv0Weight, conv0_bias);
+	for (int i = 0; i < 16; i++)
+	{
+		conv0[i] = maxPool(conv0[i]);
+	}
+	Matrix* conv1 = convLayer(conv0, 1, 1, 16, 32, Conv1Weight, conv1_bias);
+	for (int i = 0; i < 32; i++)
+	{
+		conv1[i] = maxPool(conv1[i]);
+	}
+	Matrix* conv2 = convLayer(conv1, 1, 1, 32, 32, Conv2Weight, conv2_bias);
+	float* flat = new float[2048];
+	flatten(conv2, flat);
+	float a = fcLayera(flat);
+	float b = fcLayerb(flat);
+	cout << a << " " << b << endl;
+	/*Matrix* Image = new Matrix[3];
+	Image[0] = B;
+	Image[1] = R;
+	Image[2] = G;
 	Matrix* Image_conv0 = conv0(Image);
 	for (int i = 0; i < 16; i++)
 	{
@@ -438,6 +630,6 @@ int main()
 	double bg = exp(noface);
 	double fa = exp(face);
 	cout << bg << endl;
-	cout << fa << endl;
+	cout << fa << endl;*/
 	return 0;
 }
