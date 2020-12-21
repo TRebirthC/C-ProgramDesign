@@ -324,15 +324,21 @@ float fcLayerb(float* flat)
 	return b;
 }
 
-float softMax(float fca, float fcb)
+template <typename T> T softMaxFace(T fca, T fcb)
 {
-	float sum = exp(fca) + exp(fcb);
+	T sum = exp(fca) + exp(fcb);
 	return exp(fca) / sum;
+}
+
+template <typename T> T softMaxBg(T fca, T fcb)
+{
+	T sum = exp(fca) + exp(fcb);
+	return exp(fcb) / sum;
 }
 
 int main()
 {
-	Matrix* Image = readImage("face.jpg");
+	Matrix* Image = readImage("bg.jpg");
 	float*** Conv0Weight = getConvWeight(conv0_weight, 16, 3);
 	float*** Conv1Weight = getConvWeight(conv1_weight, 32, 16);
 	float*** Conv2Weight = getConvWeight(conv2_weight, 32, 32);
@@ -351,8 +357,9 @@ int main()
 	flatten(conv2, flat);
 	float a = fcLayera(flat);
 	float b = fcLayerb(flat);
-	cout << a << " " << b << endl;
-	float confidence = softMax(a, b);
-	cout << confidence << endl;
+	float face = softMaxFace(a, b);
+	float bg = softMaxBg(a, b);
+	cout << "bg score: " << bg << endl;
+	cout << "face score: " << face << endl;
 	return 0;
 }
