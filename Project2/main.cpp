@@ -140,14 +140,6 @@ void flatten(Matrix* Image_conv2, float* flat)
 			index++;
 		}
 	}
-	/*for (int i = 0; i < 64; i++)
-	{
-		for (int j = 0; j < 32; j++)
-		{
-			flat[index] = Image_conv2[j].data[i];
-			index++;
-		}
-	}*/
 }
 
 Matrix* readImage(string filename)
